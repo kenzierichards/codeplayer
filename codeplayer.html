@@ -1,0 +1,88 @@
+<html>
+
+    <head>
+        <title>CodePlayer</title>
+        
+        <link rel="stylesheet" type="text/css" href="codeplayer.css">
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    </head>
+
+    <body>
+        
+        <div id="topbar">
+            <div id="logo">
+                CodePlayer
+            </div>
+            
+            <div id="buttonContainer">
+                <div class="toggleButton active" id="html">HTML</div>
+                <div class="toggleButton" id="css">CSS</div>
+                <div class="toggleButton" id="js">JavaScript</div>
+                <div class="toggleButton active" id="output">Output</div>
+            </div>
+        </div>
+        
+        <div id="bodyContainer">
+            
+            <textarea id="htmlPanel" class="panel"><p id="paragraph">Hello World!</p></textarea>
+            <textarea id="cssPanel" class="panel hidden">p { color: blue; }</textarea>
+            <textarea id="jsPanel" class="panel hidden">document.getElementById("paragraph").innerHTML = "Hello Kenzie!";</textarea>
+            <iframe id="outputPanel" class="panel"></iframe>
+            
+        </div>
+        
+        <script type="text/javascript">
+            
+            function updateOutput() {
+                //whenever the text area is updated,
+                //change html contents of iframe with HTML panel contents
+                //iframe means the HTML "compiles" with styling, not raw text
+                    $("iframe").contents().find("html").html("<html><head><style type='text/css'>" +   $("#cssPanel").val() + "</style></head><body>" + $("#htmlPanel").val() + "</body></html>");
+                
+                    //evaluates code in iFrame
+                    document.getElementById("outputPanel").contentWindow.eval($("#jsPanel").val());
+                    
+                //cannot just add script because we don't want JS to run in an iframe
+            }
+            
+            $(".toggleButton").hover(function() { //hover in
+                $(this).addClass("highlightedButton"); //keeps CSS and JS separate
+            }, function() { //hover out
+                $(this).removeClass("highlightedButton"); //keeps styling when hovered away
+            });
+            
+            $(".toggleButton").click(function() {
+                $(this).toggleClass("active"); 
+                //when clicked, the class is added if it's not there
+                //and removed if it is
+                
+                $(this).removeClass("highlightedButton");
+                //gets rid of grey background when clicked, so we can
+                //see what is selected when it's still hovered on
+                
+                var panelID = $(this).attr("id") + "Panel"; //panel we're going to show/hide
+                
+                $("#" + panelID).toggleClass("hidden");
+                
+                var numActivePanels = 4 - $(".hidden").length;
+                
+                $(".panel").width(($(window).width() / numActivePanels) - 10); 
+                //each panel takes up the width of the window / number of active panels
+                
+            })
+            
+            //make the panels fit on the page equally
+            $(".panel").height($(window).height() - $("#topbar").height() - 15); //
+            $(".panel").width(($(window).width() / 2)-10); //accounts for iframe size
+            
+            
+            updateOutput(); //updates output when page loads
+            
+            $("textarea").on('change keyup paste', function() {
+                 updateOutput();
+            });
+            
+        </script>
+    </body>
+</html>
